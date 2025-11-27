@@ -33,7 +33,7 @@ services:
       - elk
 
   api:
-    build: ./api
+    build: ./API
     container_name: api-service
     environment:
       - LOG_LEVEL=info
