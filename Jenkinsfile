@@ -1,8 +1,9 @@
 pipeline {
-    agent {label 'l1'}
+    agent { label 'l1' }
 
     environment {
         PYTHONNOUSERSITE = "1"
+        SSH_KEY_PATH     = "/home/ubuntu/id_rsa_elk_tf"   // приватный ключ, которым ты ходишь на ВМ
     }
 
     stages {
@@ -13,35 +14,61 @@ pipeline {
             }
         }
 
-        stage('Build Docker images') {
+        stage('Build & Smoke test (local)') {
             steps {
                 sh """
+                    # на машине Jenkins: собрать и проверить, что API вообще живой
                     docker-compose down -v || true
-                    docker-compose up -d
+                    docker-compose up -d --build
+                    sleep 15
+                    curl -f http://localhost:8000/health
                 """
             }
         }
 
-        stage('Run Services') {
+        stage('Terraform: provision infra') {
             steps {
-                sh 'docker-compose up -d'
+                dir('openstack') {
+                    sh """
+                        terraform init -input=false
+                        terraform apply -auto-approve -input=false
+                    """
+                }
             }
         }
 
-        stage('Smoke Test') {
+        stage('Ansible: deploy to ELK VM') {
             steps {
-                sh 'sleep 10'
-                sh 'curl -f http://localhost:8000/health'
+                script {
+                    // Получаем IP из Terraform output
+                    def elkIp = sh(
+                        script: "cd openstack && terraform output -raw elk_vm_ip",
+                        returnStdout: true
+                    ).trim()
+
+                    echo "ELK VM IP from Terraform: ${elkIp}"
+
+                    // Генерируем inventory.ini с нужным IP
+                    sh """
+                        cd ansible
+                        cat > inventory.ini <<EOF
+[elk]
+${elkIp} ansible_user=ubuntu ansible_ssh_private_key_file=${SSH_KEY_PATH}
+EOF
+
+                        ansible-playbook -i inventory.ini playbook.yml
+                    """
+                }
             }
         }
     }
 
     post {
         success {
-            echo "Pipeline SUCCESS: API + ELK up and running!"
+            echo "Pipeline SUCCESS: build + infra + deploy completed."
         }
         failure {
-            echo "Pipeline FAILED"
+            echo "Pipeline FAILED."
         }
     }
 }
