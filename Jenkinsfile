@@ -2,8 +2,9 @@ pipeline {
     agent { label 'l1' }
 
     environment {
-        PYTHONNOUSERSITE = "1"
-        SSH_KEY_PATH     = "/home/ubuntu/id_rsa_elk_tf"
+        PYTHONNOUSERSITE          = "1"
+        SSH_KEY_PATH              = "/home/ubuntu/id_rsa_elk_tf"
+        ANSIBLE_HOST_KEY_CHECKING = "False"
     }
 
     stages {
@@ -68,7 +69,6 @@ EOF
         stage('Wait for VM SSH') {
             steps {
                 script {
-                    // Берём актуальный IP из Terraform
                     def elkIp = sh(
                         script: "cd openstack && terraform output -raw elk_vm_ip",
                         returnStdout: true
@@ -76,7 +76,6 @@ EOF
 
                     echo "Waiting for SSH on ${elkIp}"
 
-                    // POSIX-цикл, 30 попыток по 10 секунд (итого до ~5 минут ожидания)
                     sh """
                         set -e
                         for i in \$(seq 1 30); do
@@ -107,6 +106,11 @@ EOF
 
                     sh """
                         set -e
+
+                        # На всякий случай удаляем старый host key для этого IP
+                        mkdir -p ~/.ssh
+                        ssh-keygen -R ${elkIp} || true
+
                         cd ansible
 
                         echo "==> Generate inventory.ini"
@@ -116,7 +120,7 @@ ${elkIp} ansible_user=ubuntu ansible_ssh_private_key_file=${SSH_KEY_PATH}
 EOF
 
                         echo "==> Run ansible-playbook"
-                        ansible-playbook -i inventory.ini playbook.yml
+                        ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook -i inventory.ini playbook.yml
                     """
                 }
             }
