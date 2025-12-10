@@ -48,7 +48,7 @@ user_name     = "${OS_USERNAME}"
 password      = "${OS_PASSWORD}"
 region        = "${OS_REGION_NAME:-RegionOne}"
 
-image_name    = "ununtu-22.04"
+image_name    = "ununtu-22.04"        # здесь должно быть точное имя образа из Horizon
 flavor_name   = "m1.medium"
 network_name  = "sutdents-net"
 
@@ -68,8 +68,7 @@ EOF
         stage('Wait for VM SSH') {
             steps {
                 script {
-
-                    // Получаем IP новой ВМ
+                    // Берём актуальный IP из Terraform
                     def elkIp = sh(
                         script: "cd openstack && terraform output -raw elk_vm_ip",
                         returnStdout: true
@@ -77,16 +76,17 @@ EOF
 
                     echo "Waiting for SSH on ${elkIp}"
 
+                    // POSIX-цикл, 30 попыток по 10 секунд (итого до ~5 минут ожидания)
                     sh """
                         set -e
-                        for i in {1..30}; do
+                        for i in \$(seq 1 30); do
                             echo "==> Checking SSH (${elkIp}) attempt \$i"
-                            if nc -z ${elkIp} 22; then
+                            if nc -z -w 5 ${elkIp} 22; then
                                 echo "==> SSH is UP!"
                                 exit 0
                             fi
-                            echo "==> SSH not ready, sleep 60s"
-                            sleep 60
+                            echo "==> SSH not ready, sleep 10s"
+                            sleep 10
                         done
                         echo "ERROR: SSH did not start in time"
                         exit 1
