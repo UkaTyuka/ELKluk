@@ -3,7 +3,7 @@ pipeline {
 
     environment {
         PYTHONNOUSERSITE          = "1"
-        SSH_KEY_PATH              = "/home/ubuntu.ssh/id_rsa"
+        SSH_KEY_PATH              = "/home/ubuntu/.ssh/id_rsa"
         ANSIBLE_HOST_KEY_CHECKING = "False"
     }
 
