@@ -41,6 +41,9 @@ pipeline {
                         echo "==> Source OpenStack creds"
                         . /home/ubuntu/openrc-jenkins.sh
 
+                        echo "==> Ensure keypair elk-key does not exist"
+                        openstack keypair delete elk-key || true
+
                         echo "==> Generate terraform.tfvars"
                         cat > terraform.tfvars <<EOF
 auth_url      = "${OS_AUTH_URL}"
