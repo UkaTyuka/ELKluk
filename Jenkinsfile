@@ -5,6 +5,7 @@ pipeline {
         PYTHONNOUSERSITE          = "1"
         SSH_KEY_PATH              = "/home/ubuntu/.ssh/id_rsa"
         ANSIBLE_HOST_KEY_CHECKING = "False"
+        SSH_PUB_KEY_PATH          = "/home/ubuntu/.ssh/id_rsa.pub"  // добавлено
     }
 
     stages {
@@ -38,26 +39,39 @@ pipeline {
                 dir('openstack') {
                     sh '''
                         set -e
+
                         echo "==> Source OpenStack creds"
                         . /home/ubuntu/openrc-jenkins.sh
 
                         echo "==> Ensure keypair elk-key does not exist"
                         openstack keypair delete elk-key || true
 
+                        # Проверяем, что публичный ключ существует
+                        if [ ! -f "${SSH_PUB_KEY_PATH}" ]; then
+                            echo "ERROR: Public key not found: ${SSH_PUB_KEY_PATH}"
+                            exit 1
+                        fi
+
                         echo "==> Generate terraform.tfvars"
-                        cat > terraform.tfvars <<EOF
+                        cat > terraform.tfvars <<'EOF'
 auth_url      = "${OS_AUTH_URL}"
 tenant_name   = "${OS_PROJECT_NAME}"
 user_name     = "${OS_USERNAME}"
 password      = "${OS_PASSWORD}"
 region        = "${OS_REGION_NAME:-RegionOne}"
 
-image_name    = "ununtu-22.04"        # здесь должно быть точное имя образа из Horizon
+image_name    = "ubuntu-22.04"          # !!! Убедись, что это ТОЧНОЕ имя образа из Horizon / openstack image list
 flavor_name   = "m1.medium"
-network_name  = "sutdents-net"
+network_name  = "sutdents-net"          # возможно опечатка? → students-net ?
 
-public_ssh_key = "$(cat /home/ubuntu/.ssh/id_rsa)"
+public_ssh_key = <<EOK
+$(cat ${SSH_PUB_KEY_PATH})
+EOK
+
 EOF
+
+                        echo "==> Content of generated terraform.tfvars:"
+                        cat terraform.tfvars
 
                         echo "==> Terraform init"
                         terraform init -input=false
