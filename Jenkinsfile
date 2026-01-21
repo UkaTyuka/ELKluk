@@ -34,54 +34,55 @@ pipeline {
             }
         }
 
-        stage('Terraform: provision infra') {
-            steps {
-                dir('openstack') {
-                    sh '''
-                        set -e
+       stage('Terraform: provision infra') {
+    steps {
+        dir('openstack') {
+            sh '''
+                set -e
 
-                        echo "==> Source OpenStack creds"
-                        . /home/ubuntu/openrc-jenkins.sh
+                echo "==> Source OpenStack creds"
+                . /home/ubuntu/openrc-jenkins.sh
 
-                        echo "==> Ensure keypair elk-key does not exist"
-                        openstack keypair delete elk-key || true
+                echo "==> Ensure keypair elk-key does not exist"
+                openstack keypair delete elk-key || true
 
-                        # Проверяем, что публичный ключ существует
-                        if [ ! -f "${SSH_PUB_KEY_PATH}" ]; then
-                            echo "ERROR: Public key not found: ${SSH_PUB_KEY_PATH}"
-                            exit 1
-                        fi
+                # Проверяем, что публичный ключ существует
+                if [ ! -f "${SSH_PUB_KEY_PATH}" ]; then
+                    echo "ERROR: Public key not found: ${SSH_PUB_KEY_PATH}"
+                    exit 1
+                fi
 
-                        echo "==> Generate terraform.tfvars"
-                        cat > terraform.tfvars <<'EOF'
+                echo "==> Generate terraform.tfvars"
+
+                # Подставляем значения shell-переменных прямо здесь
+                cat > terraform.tfvars <<EOF
 auth_url      = "${OS_AUTH_URL}"
 tenant_name   = "${OS_PROJECT_NAME}"
 user_name     = "${OS_USERNAME}"
 password      = "${OS_PASSWORD}"
-region        = "${OS_REGION_NAME:-RegionOne}"
+region        = "${OS_REGION_NAME:-RegionOne}"   # bash-подстановка работает здесь!
 
-image_name    = "ubuntu-22.04"          # !!! Убедись, что это ТОЧНОЕ имя образа из Horizon / openstack image list
+image_name    = "ubuntu-22.04"          # !!! Проверь точное имя: openstack image list
 flavor_name   = "m1.medium"
-network_name  = "sutdents-net"          # возможно опечатка? → students-net ?
+network_name  = "students-net"          # исправил опечатку sutdents → students (предполагаю)
 
 public_ssh_key = <<EOK
-$(cat ${SSH_PUB_KEY_PATH})
+$(cat "${SSH_PUB_KEY_PATH}")
 EOK
-
 EOF
 
-                        echo "==> Content of generated terraform.tfvars:"
-                        cat terraform.tfvars
+                echo "==> Content of generated terraform.tfvars:"
+                cat terraform.tfvars
 
-                        echo "==> Terraform init"
-                        terraform init -input=false
+                echo "==> Terraform init"
+                terraform init -input=false
 
-                        echo "==> Terraform apply"
-                        terraform apply -auto-approve -input=false
-                    '''
-                }
-            }
+                echo "==> Terraform apply"
+                terraform apply -auto-approve -input=false
+            '''
         }
+    }
+}
 
         stage('Wait for VM SSH') {
             steps {
