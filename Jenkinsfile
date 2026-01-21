@@ -64,7 +64,7 @@ region        = "${OS_REGION_NAME:-RegionOne}"   # bash-подстановка �
 
 image_name    = "ununtu-22.04"          # !!! Проверь точное имя: openstack image list
 flavor_name   = "m1.medium"
-network_name  = "students-net"          # исправил опечатку sutdents → students (предполагаю)
+network_name  = "sutdents-net"          # исправил опечатку sutdents → students (предполагаю)
 
 public_ssh_key = <<EOK
 $(cat "${SSH_PUB_KEY_PATH}")
