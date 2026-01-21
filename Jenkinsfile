@@ -62,7 +62,7 @@ user_name     = "${OS_USERNAME}"
 password      = "${OS_PASSWORD}"
 region        = "${OS_REGION_NAME:-RegionOne}"   # bash-подстановка работает здесь!
 
-image_name    = "ubuntu-22.04"          # !!! Проверь точное имя: openstack image list
+image_name    = "ununtu-22.04"          # !!! Проверь точное имя: openstack image list
 flavor_name   = "m1.medium"
 network_name  = "students-net"          # исправил опечатку sutdents → students (предполагаю)
 
