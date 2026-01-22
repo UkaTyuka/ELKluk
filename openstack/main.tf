@@ -19,18 +19,18 @@ provider "openstack" {
 
 # ----- SSH keypair для доступа к ВМ -----
 
-resource "openstack_compute_keypair_v2" "Pichugin" {
-  name       = "Pichugin"
+resource "openstack_compute_keypair_v2" "UkaTyuka" {
+  name       = "UkaTyuka"
   public_key = var.public_ssh_key
 }
 
 # ----- ВМ под ELK / API -----
 
-resource "openstack_compute_instance_v2" "Pichugin-terraform" {
-  name        = "Pichugin-terraform"
+resource "openstack_compute_instance_v2" "UkaTyuka-terraform" {
+  name        = "UkaTyuka-terraform"
   image_name  = var.image_name
   flavor_name = var.flavor_name
-  key_pair    = openstack_compute_keypair_v2.Pichugin.name
+  key_pair    = openstack_compute_keypair_v2.UkaTyuka.name
 
   network {
     name = var.network_name   # sutdents-net
