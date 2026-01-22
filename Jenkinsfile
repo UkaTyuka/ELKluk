@@ -41,8 +41,8 @@ pipeline {
                         echo "==> Source OpenStack creds"
                         . /home/ubuntu/openrc-jenkins.sh
 
-                        echo "==> Ensure keypair Petroshenko does not exist"
-                        openstack keypair delete Petroshenko || true
+                        echo "==> Ensure keypair Pichugin does not exist"
+                        openstack keypair delete Pichugin || true
 
                         echo "==> Generate terraform.tfvars"
                         cat > terraform.tfvars <<EOF
