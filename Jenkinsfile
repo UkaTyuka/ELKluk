@@ -41,8 +41,8 @@ pipeline {
                         echo "==> Source OpenStack creds"
                         . /home/ubuntu/openrc-jenkins.sh
 
-                        echo "==> Ensure keypair Pichugin does not exist"
-                        openstack keypair delete Pichugin || true
+                        echo "==> Ensure keypair UkaTyuka does not exist"
+                        openstack keypair delete UkaTyuka || true
 
                         echo "==> Generate terraform.tfvars"
                         cat > terraform.tfvars <<EOF
@@ -73,7 +73,7 @@ EOF
             steps {
                 script {
                     def elkIp = sh(
-                        script: "cd openstack && terraform output -raw Pichugin-terraform_ip",
+                        script: "cd openstack && terraform output -raw UkaTyuka-terraform_ip",
                         returnStdout: true
                     ).trim()
 
@@ -101,7 +101,7 @@ EOF
             steps {
                 script {
                     def elkIp = sh(
-                        script: "cd openstack && terraform output -raw Pichugin-terraform_ip",
+                        script: "cd openstack && terraform output -raw UkaTyuka-terraform_ip",
                         returnStdout: true
                     ).trim()
 
