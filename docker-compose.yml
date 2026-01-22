@@ -3,7 +3,7 @@ version: "3.8"
 services:
   elasticsearch:
     image: elasticsearch:7.17.0
-
+    container_name: elasticsearch
     environment:
       - discovery.type=single-node          # одиночный узел
       - ES_JAVA_OPTS=-Xms512m -Xmx512m      # подрежь память под свою ВМ
@@ -16,7 +16,7 @@ services:
 
   kibana:
     image: kibana:7.17.0
-
+    container_name: kibana
     environment:
       - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
     ports:
@@ -28,7 +28,7 @@ services:
 
   api:
     build: ./API
-
+    container_name: api-service
     environment:
       - LOG_LEVEL=info
     ports:
@@ -40,7 +40,7 @@ services:
 
   filebeat:
     image: elastic/filebeat:7.17.2
-
+    container_name: filebeat
     user: root
     volumes:
       - ./ELK/filebeat.yml:/usr/share/filebeat/filebeat.yml:ro
