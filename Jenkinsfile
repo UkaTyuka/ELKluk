@@ -5,7 +5,7 @@ pipeline {
         PYTHONNOUSERSITE          = "1"
         SSH_KEY_PATH              = "/home/ubuntu/.ssh/id_rsa"
         ANSIBLE_HOST_KEY_CHECKING = "False"
-        PATH = "/home/ubuntu/.local/bin:/usr/local/bin:/usr/bin:/bin"
+        PATH = "/usr/local/bin:/usr/bin:/bin"
     }
 
     stages {
