@@ -1,5 +1,5 @@
 pipeline {
-    agent { label 'g1' }
+    agent { label 'pi1' }
 
     environment {
         PYTHONNOUSERSITE          = "1"
@@ -43,7 +43,7 @@ pipeline {
                         . /home/ubuntu/openrc-jenkins.sh
 
                         echo "==> Ensure keypair UkaTyuka does not exist"
-                        openstack keypair delete UkaTyuka || true
+                        openstack keypair delete pitest || true
 
                         echo "==> Generate terraform.tfvars"
                         cat > terraform.tfvars <<EOF
@@ -74,7 +74,7 @@ EOF
             steps {
                 script {
                     def elkIp = sh(
-                        script: "cd openstack && terraform output -raw UkaTyuka-terraform_ip",
+                        script: "cd openstack && terraform output -raw pitest-terraform_ip",
                         returnStdout: true
                     ).trim()
 
@@ -102,7 +102,7 @@ EOF
             steps {
                 script {
                     def elkIp = sh(
-                        script: "cd openstack && terraform output -raw UkaTyuka-terraform_ip",
+                        script: "cd openstack && terraform output -raw pitest-terraform_ip",
                         returnStdout: true
                     ).trim()
 
