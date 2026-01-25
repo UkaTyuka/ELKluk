@@ -5,7 +5,6 @@ pipeline {
         PYTHONNOUSERSITE          = "1"
         SSH_KEY_PATH              = "/home/ubuntu/.ssh/id_rsa"
         ANSIBLE_HOST_KEY_CHECKING = "False"
-        PATH = "/usr/local/bin:/usr/bin:/bin"
     }
 
     stages {
@@ -42,7 +41,7 @@ pipeline {
                         echo "==> Source OpenStack creds"
                         . /home/ubuntu/openrc-jenkins.sh
 
-                        echo "==> Ensure keypair UkaTyuka does not exist"
+                        echo "==> Ensure keypair pitest does not exist"
                         openstack keypair delete pitest || true
 
                         echo "==> Generate terraform.tfvars"
