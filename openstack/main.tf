@@ -20,7 +20,7 @@ provider "openstack" {
 # ----- SSH keypair для доступа к ВМ -----
 
 resource "openstack_compute_keypair_v2" "pitest-keypar1" {
-  name       = "pitest"
+  name       = "pitest-keypar1"
   public_key = var.public_ssh_key
 }
 
