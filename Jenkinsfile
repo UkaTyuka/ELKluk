@@ -53,7 +53,7 @@ password      = "${OS_PASSWORD}"
 region        = "${OS_REGION_NAME:-RegionOne}"
 
 image_name    = "ununtu-22.04"        # здесь должно быть точное имя образа из Horizon
-flavor_name   = "m1.medium"
+flavor_name   = "m1.small"
 network_name  = "sutdents-net"
 
 public_ssh_key = "$(cat /home/ubuntu/.ssh/id_rsa.pub)"
